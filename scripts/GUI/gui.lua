@@ -623,6 +623,33 @@ function GUI.onGuiElemChanged(event)
 	-- Get the Mobile Factory --
 	local MF = getMF(player.name)
 	if MF == nil then return end
+
+	-- Check whose event it is
+	if event.element.get_mod() ~= script.mod_name then return end
+
+	-- Format: callback;tag;entid-or-0;comma-separated-cb-arguments,arg2,arg3
+	-- Something like onItemClicked;NE;123;1 -or- onOptionChanged;GUI;0;foo,bar,baz -or- onStorageChanged;OC;123 -or- onMainGUIMinimized;GUI
+	local args = split(event.element.name, ";")
+	if table_size(args) >= 2 then
+		-- Read args
+		local callback = args[1]
+		local tag =_G[args[2]]
+		-- Check callback
+		if tag == nil or tag[callback] == nil then return end
+		local objID = args[3] or "0"
+		local args = split(args[4] or "", ",")
+		-- Call callback
+		if objID ~= "0" then
+			local obj = global.entsTable[objID]
+			if not valid(obj) then return end
+			tag[callback](obj, event, MFPlayer, args)
+		else
+			tag[callback](event, MFPlayer, args)
+		end
+		-- This thing is horrible performance-wise, it need to update single gui, not everything for everyone. Acts as placeholder for now.
+		GUI.updateAllGUIs(true)
+		return
+	end
 	
 	------- Read if the Element came from the Option GUI -------
 	GUI.readOptions(event.element, player)
@@ -674,27 +701,8 @@ function GUI.onGuiElemChanged(event)
 			return
 		end
 	end
-	
-	------- Read if the Element comes from an Ore Cleaner -------
-	if string.match(event.element.name, "OC") then
-		-- Find the Ore Cleaner ID --
-		local ID = split(event.element.name, "OC")
-		ID = tonumber(ID[1])
-		-- Check the ID --
-		if ID == nil then return end
-		-- Find the Ore Cleaner --
-		local oreCleaner = nil
-		for k, oc in pairs(global.oreCleanerTable) do
-			if valid(oc) == true and oc.ent.unit_number == ID then
-				oreCleaner = oc
-			end
-		end
-		-- Check if a Ore Cleaner was found --
-		if oreCleaner == nil then return end
-		-- Change the Ore Cleaner targeted Deep Storage --
-		oreCleaner:changeInventory(tonumber(event.element.items[event.element.selected_index][4]))
-	end
-	
+
+
 	------- Read if the Element comes from a Fluid Extractor -------
 	if string.match(event.element.name, "FE") then
 		-- Find the Fluid Extractor ID --

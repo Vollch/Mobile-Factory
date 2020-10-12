@@ -147,7 +147,7 @@ function OC:getTooltipInfos(GUIObj, gui, justCreated)
 			end
 		end
 		if selectedIndex ~= nil and selectedIndex > table_size(invs) then selectedIndex = nil end
-		GUIObj:addDropDown("OC" .. self.ent.unit_number, settingsTitle, invs, selectedIndex)
+		GUIObj:addDropDown("onSelectStorage;OC;"..self.ent.unit_number, settingsTitle, invs, selectedIndex)
 
 	end
 
@@ -173,6 +173,10 @@ function OC:getTooltipInfos(GUIObj, gui, justCreated)
 		GUIObj:addLabel("", informationFlow, {"", {"gui-description.MFTooFar"}}, _mfRed)
 	end
 
+end
+
+function OC:onSelectStorage(event, MFPlayer, args)
+	self:changeInventory(tonumber(event.element.items[event.element.selected_index][4]))
 end
 
 -- Change the Targeted Inventory --
