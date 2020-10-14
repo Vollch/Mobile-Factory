@@ -146,9 +146,7 @@ function QC:balance()
 
 	local selfMaxOutFlow = self.quatronMaxOutput
 	local selfMaxInFlow = self.quatronMaxInput
-	local selfQuatron = self.quatronCharge
 	local selfMaxQuatron = self.quatronMax
-	local selfQuatronLevel = self.quatronLevel
 
 	-- Check all Accumulator --
 	for k, ent in pairs(ents) do
@@ -160,30 +158,30 @@ function QC:balance()
 			local objMaxQuatron = obj.quatronMax
 			local objMaxInFlow = obj.quatronMaxInput
 			local objMaxOutFlow = obj.quatronMaxOutput
+			local selfQuatron = self.quatronCharge
 			if selfQuatron > objQuatron and objQuatron < objMaxQuatron and objMaxInFlow > 0 then
 				-- Calcule max flow --
 				local quatronVariance = isAcc and math.floor((selfQuatron - objQuatron) / 2) or selfQuatron
 				local missingQuatron = objMaxQuatron - objQuatron
 				local quatronTransfer = math.min(quatronVariance, missingQuatron, selfMaxOutFlow, objMaxInFlow)
 				-- Transfer Quatron --
-				obj:addQuatron(quatronTransfer, self.quatronLevel)
+				quatronTransfer = obj:addQuatron(quatronTransfer, self.quatronLevel)
 				-- Remove Quatron --
-				selfQuatron = selfQuatron - quatronTransfer
+				self.quatronCharge = selfQuatron - quatronTransfer
 			elseif selfQuatron < objQuatron and selfQuatron < selfMaxQuatron and objMaxOutFlow > 0 then
 				-- Calcule max flow --
 				local quatronVariance = isAcc and math.floor((objQuatron - selfQuatron) / 2) or objQuatron
 				local missingQuatron = selfMaxQuatron - selfQuatron
 				local quatronTransfer = math.min(quatronVariance, missingQuatron, selfMaxInFlow, objMaxOutFlow)
 				-- Transfer Quatron --
-				selfQuatron = selfQuatron + quatronTransfer
+				quatronTransfer = self:addQuatron(quatronTransfer, obj.quatronLevel)
 				-- Remove Quatron --
 				obj.quatronCharge = objQuatron - quatronTransfer
 			end
 		end
 	end
 
-	self.quatronCharge = selfQuatron
-	self.ent.energy = selfQuatron
+	self.ent.energy = self.quatronCharge
 end
 
 -- Return the amount of Quatron --

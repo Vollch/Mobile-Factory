@@ -162,7 +162,7 @@ function QR:sendQuatron()
 				local missingQuatron = objMaxQuatron - objQuatron
 				local quatronTransfer = math.min(selfQuatron, missingQuatron, objMaxInFlow)
 				-- Transfer Quatron --
-				obj:addQuatron(quatronTransfer, self.quatronLevel)
+				quatronTransfer = obj:addQuatron(quatronTransfer, selfQuatronLevel)
 				-- Remove Quatron --
 				selfQuatron = selfQuatron - quatronTransfer
 				if selfQuatron <= 0 then break end
