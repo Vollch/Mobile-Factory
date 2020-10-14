@@ -95,9 +95,6 @@ function QC:update()
 		return
 	end
 
-	-- Update Quatron indication
-	self.ent.energy = self.quatronCharge
-
 	-- Update the Sprite --
 	local spriteNumber = math.ceil(self.quatronCharge/self.quatronMax*10)
 	rendering.destroy(self.spriteID)
@@ -141,9 +138,6 @@ function QC:balance()
 	local area = {{self.ent.position.x-1.5, self.ent.position.y-1.5},{self.ent.position.x+1.5,self.ent.position.y+1.5}}
 	local ents = self.ent.surface.find_entities_filtered{area=area, name=_mfQuatronShare}
 
-	-- Return if nothing found
-	if next(ents) == nil then return end
-
 	local selfMaxOutFlow = self.quatronMaxOutput
 	local selfMaxInFlow = self.quatronMaxInput
 	local selfMaxQuatron = self.quatronMax
@@ -152,7 +146,7 @@ function QC:balance()
 	for k, ent in pairs(ents) do
 		-- Look for valid Quatron User --
 		local obj = global.entsTable[ent.unit_number]
-		if obj ~= nil then
+		if obj ~= nil and obj.entID ~= self.entID then
 			local isAcc = ent.type == "accumulator"
 			local objQuatron = obj.quatronCharge
 			local objMaxQuatron = obj.quatronMax

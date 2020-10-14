@@ -102,9 +102,6 @@ function EC:balance()
 	local area = {{self.ent.position.x-1.5, self.ent.position.y-1.5},{self.ent.position.x+1.5,self.ent.position.y+1.5}}
 	local ents = self.ent.surface.find_entities_filtered{area=area, name=_mfEnergyShare}
 
-	-- Return if nothing found
-	if next(ents) == nil then return end
-
 	local selfMaxOutFlow = self.ent.electric_output_flow_limit * self.updateTick
 	local selfMaxInFlow = self.ent.electric_input_flow_limit * self.updateTick
 	local selfEnergy = self.ent.energy
@@ -114,7 +111,7 @@ function EC:balance()
 	for k, ent in pairs(ents) do
 		-- Look for valid Energy Cube --
 		local obj = global.entsTable[ent.unit_number]
-		if obj ~= nil then
+		if obj ~= nil and obj.entID ~= self.entID then
 			local isAcc = ent.type == "accumulator"
 			local objEnergy = obj.ent.energy
 			local objMaxEnergy = obj.ent.electric_buffer_size

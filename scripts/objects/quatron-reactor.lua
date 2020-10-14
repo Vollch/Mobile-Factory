@@ -143,16 +143,13 @@ function QR:sendQuatron()
 	local area = {{self.ent.position.x-2.5, self.ent.position.y-2.5},{self.ent.position.x+2.5,self.ent.position.y+2.5}}
 	local ents = self.ent.surface.find_entities_filtered{area=area, name=_mfQuatronShare}
 
-	-- Return if nothing found
-	if next(ents) == nil then return end
-
 	local selfQuatronLevel = self.quatronLevel
 
 	-- Check all Entity --
 	for k, ent in pairs(ents) do
 		-- Look for valid Object --
 		local obj = global.entsTable[ent.unit_number]
-		if obj ~= nil then
+		if obj ~= nil and obj.entID ~= self.entID then
 			local objQuatron = obj.quatronCharge
 			local objQuatronLevel = obj.quatronLevel
 			local objMaxQuatron = obj.quatronMax
