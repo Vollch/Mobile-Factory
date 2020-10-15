@@ -103,9 +103,7 @@ function EC:balance()
 	local ents = self.ent.surface.find_entities_filtered{area=area, name=_mfEnergyShare}
 
 	local selfMaxOutFlow = self.ent.electric_output_flow_limit * self.updateTick
-	local selfMaxInFlow = self.ent.electric_input_flow_limit * self.updateTick
 	local selfEnergy = self.ent.energy
-	local selfMaxEnergy = self.ent.electric_buffer_size
 
 	-- Check all Accumulator --
 	for k, ent in pairs(ents) do
@@ -115,26 +113,17 @@ function EC:balance()
 			local isAcc = ent.type == "accumulator"
 			local objEnergy = obj.ent.energy
 			local objMaxEnergy = obj.ent.electric_buffer_size
-			if selfEnergy > objEnergy and objEnergy < objMaxEnergy then
+			local objMaxInFlow = obj:maxInput() * self.updateTick
+			local shareThreshold = isAcc and objEnergy or 0
+			if selfEnergy > shareThreshold and objEnergy < objMaxEnergy and objMaxInFlow > 0 then
 				-- Calcule max flow --
 				local energyVariance = isAcc and math.floor((selfEnergy - objEnergy) / 2) or selfEnergy
 				local missingEnergy = objMaxEnergy - objEnergy
-				local objMaxInFlow = obj:maxInput() * self.updateTick
 				local energyTransfer = math.min(energyVariance, missingEnergy, selfMaxOutFlow, objMaxInFlow)
 				-- Transfer Energy --
 				obj.ent.energy = objEnergy + energyTransfer
 				-- Remove Energy --
 				selfEnergy = selfEnergy - energyTransfer
-			elseif selfEnergy < objEnergy and selfEnergy < selfMaxEnergy then
-				-- Calcule max flow --
-				local energyVariance = isAcc and math.floor((objEnergy - selfEnergy) / 2) or objEnergy
-				local missingEnergy = selfMaxEnergy - selfEnergy
-				local objMaxOutFlow = obj:maxOutput() * self.updateTick
-				local energyTransfer = math.min(energyVariance, missingEnergy, selfMaxInFlow, objMaxOutFlow)
-				-- Transfer Energy --
-				selfEnergy = selfEnergy + energyTransfer
-				-- Remove Energy --
-				obj.ent.energy = objEnergy - energyTransfer
 			end
 		end
 	end

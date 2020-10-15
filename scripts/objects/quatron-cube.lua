@@ -139,8 +139,8 @@ function QC:balance()
 	local ents = self.ent.surface.find_entities_filtered{area=area, name=_mfQuatronShare}
 
 	local selfMaxOutFlow = self.quatronMaxOutput
-	local selfMaxInFlow = self.quatronMaxInput
-	local selfMaxQuatron = self.quatronMax
+	local selfQuatron = self.quatronCharge
+	local selfQuatronLevel = self.quatronLevel
 
 	-- Check all Accumulator --
 	for k, ent in pairs(ents) do
@@ -151,31 +151,22 @@ function QC:balance()
 			local objQuatron = obj.quatronCharge
 			local objMaxQuatron = obj.quatronMax
 			local objMaxInFlow = obj.quatronMaxInput
-			local objMaxOutFlow = obj.quatronMaxOutput
-			local selfQuatron = self.quatronCharge
-			if selfQuatron > objQuatron and objQuatron < objMaxQuatron and objMaxInFlow > 0 then
+			local shareThreshold = isAcc and objQuatron or 0
+			if selfQuatron > shareThreshold and objQuatron < objMaxQuatron and objMaxInFlow > 0 then
 				-- Calcule max flow --
 				local quatronVariance = isAcc and math.floor((selfQuatron - objQuatron) / 2) or selfQuatron
 				local missingQuatron = objMaxQuatron - objQuatron
 				local quatronTransfer = math.min(quatronVariance, missingQuatron, selfMaxOutFlow, objMaxInFlow)
 				-- Transfer Quatron --
-				quatronTransfer = obj:addQuatron(quatronTransfer, self.quatronLevel)
+				quatronTransfer = obj:addQuatron(quatronTransfer, selfQuatronLevel)
 				-- Remove Quatron --
-				self.quatronCharge = selfQuatron - quatronTransfer
-			elseif selfQuatron < objQuatron and selfQuatron < selfMaxQuatron and objMaxOutFlow > 0 then
-				-- Calcule max flow --
-				local quatronVariance = isAcc and math.floor((objQuatron - selfQuatron) / 2) or objQuatron
-				local missingQuatron = selfMaxQuatron - selfQuatron
-				local quatronTransfer = math.min(quatronVariance, missingQuatron, selfMaxInFlow, objMaxOutFlow)
-				-- Transfer Quatron --
-				quatronTransfer = self:addQuatron(quatronTransfer, obj.quatronLevel)
-				-- Remove Quatron --
-				obj.quatronCharge = objQuatron - quatronTransfer
+				selfQuatron = selfQuatron - quatronTransfer
 			end
 		end
 	end
 
-	self.ent.energy = self.quatronCharge
+	self.quatronCharge = selfQuatron
+	self.ent.energy = selfQuatron
 end
 
 -- Return the amount of Quatron --
