@@ -196,7 +196,7 @@ function NE:getTooltipInfos(GUIObj, gui, justCreated)
 end
 
 function NE:onDNStorageItemClicked(event, args)
-	local storage = global.deepStorageTable[args[1]]
+	local storage = global.deepStorageTable[tonumber(args[1])]
 	local count = Util.getEventCount(event)
 	local MFPlayer = getMFPlayer(event.player_index)
 	self:transferItemsFromDS(MFPlayer.ent.get_main_inventory(), storage, count)

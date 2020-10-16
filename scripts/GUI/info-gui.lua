@@ -299,7 +299,6 @@ function GUI.updateDeepTankInfo(GUIObj, id)
 	local gui = GUIObj.TanksOptionFrame
 	local deepTank = global.deepTankTable[id]
 	gui.visible = true
-
 	-- Clear the Frame --
 	gui.clear()
 
@@ -502,13 +501,12 @@ end
 function GUI.onDNStorageClicked(event, args)
 	local storage = args[1]
 	local MFPlayer = getMFPlayer(event.player_index)
-	GUI.updateDeepStorageInfo(MFPlayer.GUI["MFInfoGUI"], storage)
+	GUI.updateDeepStorageInfo(MFPlayer.GUI["MFInfoGUI"], tonumber(storage))
 end
 
 -- Info GUI Deep Tank Button --
 function GUI.onDNTankClicked(event, args)
 	local tank = args[1]
 	local MFPlayer = getMFPlayer(event.player_index)
-	game.print(tank)
-	GUI.updateDeepTankInfo(MFPlayer.GUI["MFInfoGUI"], tank)
+	GUI.updateDeepTankInfo(MFPlayer.GUI["MFInfoGUI"], tonumber(tank))
 end
