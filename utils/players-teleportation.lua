@@ -124,3 +124,8 @@ function teleportPlayerToFactory(player, MF)
 	-- Play the sound --
 	player.surface.play_sound{path="MFEnter", position=player.position}
 end
+
+function GUI.onTeleportOutside(event, args)
+	local player = getPlayer(event.player_index)
+	teleportPlayerOutside(player)
+end

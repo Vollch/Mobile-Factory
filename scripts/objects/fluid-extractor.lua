@@ -134,7 +134,7 @@ function FE:getTooltipInfos(GUIObj, gui, justCreated)
 			end
 		end
 		if selectedIndex ~= nil and selectedIndex > table_size(invs) then selectedIndex = nil end
-		GUIObj:addDropDown("FE" .. self.ent.unit_number, settingsTitle, invs, selectedIndex)
+		GUIObj:addDropDown("onChangeDimTank;"..self.entID, settingsTitle, invs, selectedIndex)
 
 	end
 
@@ -169,8 +169,9 @@ function FE:getTooltipInfos(GUIObj, gui, justCreated)
 end
 
 -- Change the Targeted Dimensional Tank --
-function FE:changeDimTank(ID)
+function FE:onChangeDimTank(event, args)
 	-- Check the ID --
+	local ID = tonumber(event.element.items[event.element.selected_index][4])
 	if ID == nil then
 		self.selectedInv = nil
 		return

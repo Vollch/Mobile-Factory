@@ -131,12 +131,13 @@ end
 function MF:getTooltipInfos(GUIObj, gui, justCreated)
 
 	if justCreated == true then
+		local entID = self.ent.unit_number
 
 		-- Create the Inventory Title --
 		local inventoryTitle = GUIObj:addTitledFrame("", gui, "vertical", {"gui-description.Inventory"}, _mfOrange)
 
 		-- Create the Inventory Button --
-		GUIObj:addSimpleButton("MFOpenI," ..self.player, inventoryTitle, {"gui-description.OpenInventory"})
+		GUIObj:addSimpleButton("onOpenInventory;"..entID, inventoryTitle, {"gui-description.OpenInventory"})
 
 		-- Create the Lasers Title --
 		local LasersFrame = GUIObj:addTitledFrame("", gui, "vertical", {"gui-description.Lasers"}, _mfOrange)
@@ -147,7 +148,7 @@ function MF:getTooltipInfos(GUIObj, gui, justCreated)
 			GUIObj:addLabel("", LasersFrame, {"", {"gui-description.EnergyLaser"}}, _mfOrange)
 			local state = "left"
 			if self.selectedEnergyLaserMode == "output" then state = "right" end
-			GUIObj:addSwitch("MFEL" .. self.ent.unit_number, LasersFrame, {"gui-description.Drain"}, {"gui-description.Send"}, {"gui-description.DrainTT"}, {"gui-description.SendTT"}, state)
+			GUIObj:addSwitch("onSwitchLaserMode;"..entID..";EnergyLaser", LasersFrame, {"gui-description.Drain"}, {"gui-description.Send"}, {"gui-description.DrainTT"}, {"gui-description.SendTT"}, state)
 		end
 
 		-- Create the Quatron Lasers Settings --
@@ -156,7 +157,7 @@ function MF:getTooltipInfos(GUIObj, gui, justCreated)
 			GUIObj:addLabel("", LasersFrame, {"", {"gui-description.QuatronLaser"}}, _mfOrange)
 			local state = "left"
 			if self.selectedQuatronLaserMode == "output" then state = "right" end
-			GUIObj:addSwitch("MFQL" .. self.ent.unit_number, LasersFrame, {"gui-description.Drain"}, {"gui-description.Send"}, {"gui-description.DrainTT"}, {"gui-description.SendTT"}, state)
+			GUIObj:addSwitch("onSwitchLaserMode;"..entID..";QuatronLaser", LasersFrame, {"gui-description.Drain"}, {"gui-description.Send"}, {"gui-description.DrainTT"}, {"gui-description.SendTT"}, state)
 		end
 
 		-- Create the Fluid Lasers Settings --
@@ -165,7 +166,7 @@ function MF:getTooltipInfos(GUIObj, gui, justCreated)
 			GUIObj:addLabel("", LasersFrame, {"", {"gui-description.FluidLaser"}}, _mfOrange)
 			local state = "left"
 			if self.selectedFluidLaserMode == "output" then state = "right" end
-			GUIObj:addSwitch("MFFMode" .. self.ent.unit_number, LasersFrame, {"gui-description.Input"}, {"gui-description.Output"}, {"gui-description.InputTT"}, {"gui-description.OutputTT"}, state)
+			GUIObj:addSwitch("onSwitchLaserMode;"..entID..";FluidLaser", LasersFrame, {"gui-description.Input"}, {"gui-description.Output"}, {"gui-description.InputTT"}, {"gui-description.OutputTT"}, state)
 			GUIObj:addLabel("", LasersFrame, {"", {"gui-description.MSTarget"}}, _mfOrange)
 			-- Create the Target List --
 			local invs = {{"", {"gui-description.None"}}}
@@ -187,14 +188,26 @@ function MF:getTooltipInfos(GUIObj, gui, justCreated)
 				end
 			end
 			if selectedIndex ~= nil and selectedIndex > table_size(invs) then selectedIndex = nil end
-			GUIObj:addDropDown("MFFTarget" .. self.ent.unit_number, LasersFrame, invs, selectedIndex)
+			GUIObj:addDropDown("onFluidLaserTarget;"..entID, LasersFrame, invs, selectedIndex)
 		end
 	end
 end
 
+-- Change the Energy Laser Mode --
+function MF:onSwitchLaserMode(event, args)
+	local laser = args[1]
+	local modeSwitch = "selected" .. laser .. "Mode"
+	if event.element.switch_state == "left" then
+		self[modeSwitch] = "input"
+	else
+		self[modeSwitch] = "output"
+	end
+end
+
 -- Change the Fluid Laser Targeted Inventory --
-function MF:fluidLaserTarget(ID)
+function MF:onFluidLaserTarget(event, args)
 	-- Check the ID --
+	local ID = tonumber(event.element.items[event.element.selected_index][4])
 	if ID == nil then
 		self.selectedInv = nil
 		return
@@ -208,6 +221,29 @@ function MF:fluidLaserTarget(ID)
 			end
 		end
 	end
+end
+
+function MF:onToggleOption(event, args)
+	local option = args[1]
+	-- Invert current value
+	self[option] = not self[option]
+	-- Print message to player
+	if _mfGUIMessage[option] ~= nil then
+		local player = getPlayer(event.player_index)
+		if self[option] then
+			player.print(_mfGUIMessage[option].on)
+		else
+			player.print(_mfGUIMessage[option].off)
+		end
+	end
+end
+
+function MF:onOpenInventory(event, args)
+	local playerIndex = event.player_index
+	local player = getPlayer(playerIndex)
+	local MFPlayer = getMFPlayer(playerIndex)
+	MFPlayer.varTable.bypassGUI = true
+	player.opened = self.ent
 end
 
 -- Update the Mobile Factory --
@@ -637,7 +673,7 @@ function MF:factoryTeleportBox()
 	if self.fS ~= nil then
 		local entities = self.fS.find_entities_filtered{area={{-1,-1},{1,1}}, type="character"}
 		for k, entity in pairs(entities) do
-			teleportPlayerOutside(entity.player, self)
+			teleportPlayerOutside(entity.player)
 		end
 	end
 	-- Factory to Control Center --

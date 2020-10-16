@@ -140,7 +140,7 @@ function FI:getTooltipInfos(GUIObj, gui, justCreated)
 	GUIObj:addLabel("", titleFrame, {"gui-description.SelectMode"}, _mfOrange)
 	local state = "left"
 	if self.selectedMode == "output" then state = "right" end
-	GUIObj:addSwitch("FIMode" .. self.ent.unit_number, titleFrame, {"gui-description.Input"}, {"gui-description.Output"}, {"gui-description.InputTT"}, {"gui-description.OutputTT"}, state)
+	GUIObj:addSwitch("onChangeMode;"..self.entID, titleFrame, {"gui-description.Input"}, {"gui-description.Output"}, {"gui-description.InputTT"}, {"gui-description.OutputTT"}, state)
 
 	-- Create the Inventory Selection --
 	GUIObj:addLabel("", titleFrame, {"gui-description.MSTarget"}, _mfOrange)
@@ -173,25 +173,27 @@ function FI:getTooltipInfos(GUIObj, gui, justCreated)
 		end
 	end
 	if selectedIndex > table_size(invs) then selectedIndex = nil end
-	GUIObj:addDropDown("FITarget" .. self.ent.unit_number, titleFrame, invs, selectedIndex)
+	GUIObj:addDropDown("onChangeInventory;"..self.entID, titleFrame, invs, selectedIndex)
 end
 
 -- Change the Mode --
-function FI:changeMode(mode)
-    if mode == "left" then
-        self.selectedMode = "input"
-    elseif mode == "right" then
-        self.selectedMode = "output"
-    end
+function FI:onChangeMode(event, args)
+	local mode = event.element.switch_state
+	if mode == "left" then
+		self.selectedMode = "input"
+	elseif mode == "right" then
+		self.selectedMode = "output"
+	end
 end
 
 -- Change the Targeted Inventory --
-function FI:changeInventory(ID)
+function FI:onChangeInventory(event, args)
 	-- Check the ID --
-    if ID == nil then
-        self.selectedInv = nil
-        return
-    end
+	local ID = tonumber(event.element.items[event.element.selected_index][5])
+	if ID == nil then
+		self.selectedInv = nil
+		return
+	end
 	-- Select the Inventory --
 	self.selectedInv = nil
 	for k, deepTank in pairs(self.dataNetwork.DTKTable) do

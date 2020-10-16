@@ -1,8 +1,10 @@
 -- Read changed Options from the Options GUI --
-function GUI.readOptions(option, player)
+function GUI.readOptions(event)
 	
 	-- Get all needed variables --
-	local playerIndex = player.index
+	local option = event.element
+	local playerIndex = event.player_index
+	local player = getPlayer(playerIndex)
 	local MFPlayer = getMFPlayer(playerIndex)
 	local name = option.name
 	local MF = getMF(player.name)

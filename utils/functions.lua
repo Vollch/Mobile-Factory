@@ -367,7 +367,7 @@ function newMobileFactory(MF)
 end
 
 -- If Mobile Factory or his surfaces are broken, try to fix them --
-function fixMB(event)
+function Util.fixMF(event, args)
 	-- Get the Mobile Factory --
 	local player = getPlayer(event.player_index)
 	if player == nil then return end
@@ -611,4 +611,14 @@ function mixQuatron(obj, newCharge, newLevel)
 	local effectiveCharge = obj.quatronCharge * math.pow(obj.quatronLevel, _mfQuatronScalePower) + newCharge * math.pow(newLevel, _mfQuatronScalePower)
 	obj.quatronCharge = obj.quatronCharge + newCharge
 	obj.quatronLevel = math.pow(effectiveCharge / obj.quatronCharge, 1/_mfQuatronScalePower)
+end
+
+function Util.getEventCount(event)
+	local count = 1
+	if event.alt == true then count = 10 end
+	if event.control == true then count = 100 end
+	if event.shift == true then count = nil end
+	if event.button == defines.mouse_button_type.right then count = -1 end
+	if event.button == defines.mouse_button_type.right and event.shift == true then count = 99999999 end
+	return count
 end

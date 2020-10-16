@@ -121,7 +121,7 @@ function DSR:getTooltipInfos(GUIObj, gui, justCreated)
 
 		-- Create the Filter Selection Label and Filter --
 		GUIObj:addLabel("", settingTitle, {"gui-description.ChangeFilter"}, _mfOrange)
-		GUIObj:addFilter("DSRF" .. tostring(self.ent.unit_number), settingTitle, {"gui-description.FilterSelect"}, true, "item", 40)
+		GUIObj:addFilter("onChangeFilter;"..self.entID, settingTitle, {"gui-description.FilterSelect"}, true, "item", 40)
 
 	end
 
@@ -146,10 +146,18 @@ function DSR:getTooltipInfos(GUIObj, gui, justCreated)
 	GUIObj:addDualLabel(inventoryFlow, {"", {"gui-description.Filter"}, ":"}, filterName, _mfOrange, _mfGreen)
 
 	-- Update the Filter --
-	if game.item_prototypes[self.filter] ~= nil and GUIObj["DSRF" .. tostring(self.ent.unit_number)] ~= nil then
-		GUIObj["DSRF" .. tostring(self.ent.unit_number)].elem_value = self.filter
+	if game.item_prototypes[self.filter] ~= nil and GUIObj["onChangeFilter;" .. tostring(self.ent.unit_number)] ~= nil then
+		GUIObj["onChangeFilter;" .. tostring(self.ent.unit_number)].elem_value = self.filter
 	end
 
+end
+
+function DSR:onChangeFilter(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	self.filter = event.element.elem_value
+	if MFPlayer.GUI["MFInfoGUI"] ~= nil then
+		GUI.updateDeepStorageInfo(MFPlayer.GUI["MFInfoGUI"], self.ent.unit_number)
+	end
 end
 
 -- Return the number of item present inside the Inventory --

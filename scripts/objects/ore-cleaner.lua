@@ -147,7 +147,7 @@ function OC:getTooltipInfos(GUIObj, gui, justCreated)
 			end
 		end
 		if selectedIndex ~= nil and selectedIndex > table_size(invs) then selectedIndex = nil end
-		GUIObj:addDropDown("OC" .. self.ent.unit_number, settingsTitle, invs, selectedIndex)
+		GUIObj:addDropDown("onChangeInventory;"..self.entID, settingsTitle, invs, selectedIndex)
 
 	end
 
@@ -176,8 +176,9 @@ function OC:getTooltipInfos(GUIObj, gui, justCreated)
 end
 
 -- Change the Targeted Inventory --
-function OC:changeInventory(ID)
+function OC:onChangeInventory(event, args)
 	-- Check the ID --
+	local ID = tonumber(event.element.items[event.element.selected_index][4])
 	if ID == nil then
 		self.selectedInv = nil
 		return

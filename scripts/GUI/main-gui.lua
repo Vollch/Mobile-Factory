@@ -53,9 +53,9 @@ function GUI.createMFMainGUI(player)
 	GUIObj:addEmptyWidget("MainGUIDragArea", MFMainGUIFrame1, mfGUI, 15, 15)
 
 	-- Add All Buttons --
-	GUIObj:addButton("MainGUIOptionButton", MFMainGUIFrame1, "OptionIcon", "OptionIcon", {"gui-description.optionButton"}, 15)
-	GUIObj:addButton("MainGUIInfosButton", MFMainGUIFrame1, "MFIconI", "MFIconI", {"gui-description.MFInfosButton"}, 15)
-	GUIObj:addButton("MainGUIReduceButton", MFMainGUIFrame1, ExtendButtonSprite, ExtendButtonSprite, {"gui-description.reduceButton"}, 15, true)
+	GUIObj:addButton("onToggleGui;GUI;MFOptionGUI", MFMainGUIFrame1, "OptionIcon", "OptionIcon", {"gui-description.optionButton"}, 15)
+	GUIObj:addButton("onToggleGui;GUI;MFInfoGUI", MFMainGUIFrame1, "MFIconI", "MFIconI", {"gui-description.MFInfosButton"}, 15)
+	GUIObj:addButton("onReduceMainGUI;GUI", MFMainGUIFrame1, ExtendButtonSprite, ExtendButtonSprite, {"gui-description.reduceButton"}, 15, "MainGUIReduceButton")
 
 	-- Make the GUI visible or not --
 	MFMainGUIFrame2.visible = visible
@@ -118,11 +118,22 @@ function GUI.updateMFMainGUI(GUIObj)
 	-- Set Style --
 	GUIObj.MFMainGUIFrame2.JumpDriveBar.style.bottom_padding = 1
 
+	-- Clear the Buttons Frame --
+	GUIObj.MFMainGUIFrame3.clear()
+	-- No need to show buttons if player don't have MF
+	if MF.ent == nil then
+		GUIObj.MFMainGUIFrame3.visible = false
+		return
+	else
+		GUIObj.MFMainGUIFrame3.visible = true
+	end
+	local entID = MF.ent.valid and MF.ent.unit_number or 0
+
 	-------------------------------------------------------- Get Buttons Variables --------------------------------------------------------
 	local showCallMFButton = technologyUnlocked("JumpDrive", getForce(player.name))
 	local syncAreaSprite = MF.syncAreaEnabled == true and "SyncAreaIcon" or "SyncAreaIconDisabled"
 	local syncAreaHovSprite = MF.syncAreaEnabled == true and "SyncAreaIconDisabled" or "SyncAreaIcon"
-	local showFindMFButton = (MF.ent ~= nil and MF.ent.valid == false) and true or false
+	local showFindMFButton = MF.ent.valid == false and true or false
 	local tpInsideSprite = MF.tpEnabled == true and "MFTPIcon" or "MFTPIconDisabled"
 	local tpInsideHovSprite = MF.tpEnabled == true and "MFTPIconDisabled" or "MFTPIcon"
 	local lockMFSprite = MF.locked == true and "LockMFCIcon" or "LockMFOIcon"
@@ -139,20 +150,20 @@ function GUI.updateMFMainGUI(GUIObj)
 	local showQuatronDrainButton = technologyUnlocked("EnergyDrain1", getForce(player.name)) and technologyUnlocked("QuatronLogistic", getForce(player.name)) and true or false
 	local quatronDrainSprite = MF.quatronLaserActivated == true and "QuatronIcon" or "QuatronIconDisabled"
 	local quatronDrainHovSprite = MF.quatronLaserActivated == true and "QuatronIconDisabled" or "QuatronIcon"
-	
+
 
 	-------------------------------------------------------- Update all Buttons --------------------------------------------------------
 	local buttonsSize = 15
-	GUI.addButtonToMainGui(GUIObj, {name="PortOutsideButton", sprite="PortIcon", hovSprite="PortIcon", tooltip={"gui-description.teleportOutsideButton"}, size=buttonsSize, save=false})
-	GUI.addButtonToMainGui(GUIObj, {name="SyncAreaButton", sprite=syncAreaSprite, hovSprite=syncAreaHovSprite, tooltip={"gui-description.syncAreaButton"}, size=buttonsSize, save=false})
-	GUI.addButtonToMainGui(GUIObj, {name="FindMFButton", sprite="MFIconExc", hovSprite="MFIconExc", tooltip={"gui-description.fixMFButton"}, size=buttonsSize, save=false, visible=showFindMFButton})
-	GUI.addButtonToMainGui(GUIObj, {name="TPInsideButton", sprite=tpInsideSprite, hovSprite=tpInsideHovSprite, tooltip={"gui-description.MFTPInside"}, size=buttonsSize, save=false})
-	GUI.addButtonToMainGui(GUIObj, {name="LockMFButton", sprite=lockMFSprite, hovSprite=lockMFHovSprite, tooltip={"gui-description.LockMF"}, size=buttonsSize, save=false})
-	GUI.addButtonToMainGui(GUIObj, {name="JumpDriveButton", sprite="MFJDIcon", hovSprite="MFJDIcon", tooltip={"gui-description.jumpDriveButton"}, size=buttonsSize, save=false, visible=showCallMFButton})
-	GUI.addButtonToMainGui(GUIObj, {name="EnergyDrainButton", sprite=energyDrainSprite, hovSprite=energyDrainHovSprite, tooltip={"gui-description.mfEnergyDrainButton"}, size=buttonsSize, save=false, visible=showEnergyDrainButton})
-	GUI.addButtonToMainGui(GUIObj, {name="FluidDrainButton", sprite=fluidDrainSprite, hovSprite=fluidDrainHovSprite, tooltip={"gui-description.mfFluidDrainButton"}, size=buttonsSize, save=false, visible=showFluidDrainButton})
-	GUI.addButtonToMainGui(GUIObj, {name="ItemDrainButton", sprite=itemDrainSprite, hovSprite=itemDrainHovSprite, tooltip={"gui-description.mfItemDrainButton"}, size=buttonsSize, save=false, visible=showItemDrainButton})
-	GUI.addButtonToMainGui(GUIObj, {name="QuatronDrainButton", sprite=quatronDrainSprite, hovSprite=quatronDrainHovSprite, tooltip={"gui-description.mfQuatronDrainButton"}, size=buttonsSize, save=false, visible=showQuatronDrainButton})
+	GUI.addButtonToMainGui(GUIObj, {label="PortOutsideButton", name="onTeleportOutside;GUI", sprite="PortIcon", hovSprite="PortIcon", tooltip={"gui-description.teleportOutsideButton"}, size=buttonsSize, save=false})
+	GUI.addButtonToMainGui(GUIObj, {label="SyncAreaButton", name="onToggleOption;"..entID..";syncAreaEnabled", sprite=syncAreaSprite, hovSprite=syncAreaHovSprite, tooltip={"gui-description.syncAreaButton"}, size=buttonsSize, save=false})
+	GUI.addButtonToMainGui(GUIObj, {label="FindMFButton", name="fixMF;Util", sprite="MFIconExc", hovSprite="MFIconExc", tooltip={"gui-description.fixMFButton"}, size=buttonsSize, save=false, visible=showFindMFButton})
+	GUI.addButtonToMainGui(GUIObj, {label="TPInsideButton", name="onToggleOption;"..entID..";tpEnabled", sprite=tpInsideSprite, hovSprite=tpInsideHovSprite, tooltip={"gui-description.MFTPInside"}, size=buttonsSize, save=false})
+	GUI.addButtonToMainGui(GUIObj, {label="LockMFButton", name="onToggleOption;"..entID..";locked", sprite=lockMFSprite, hovSprite=lockMFHovSprite, tooltip={"gui-description.LockMF"}, size=buttonsSize, save=false})
+	GUI.addButtonToMainGui(GUIObj, {label="JumpDriveButton", name="onToggleGui;GUI;MFTPGUI", sprite="MFJDIcon", hovSprite="MFJDIcon", tooltip={"gui-description.jumpDriveButton"}, size=buttonsSize, save=false, visible=showCallMFButton})
+	GUI.addButtonToMainGui(GUIObj, {label="EnergyDrainButton", name="onToggleOption;"..entID..";energyLaserActivated", sprite=energyDrainSprite, hovSprite=energyDrainHovSprite, tooltip={"gui-description.mfEnergyDrainButton"}, size=buttonsSize, save=false, visible=showEnergyDrainButton})
+	GUI.addButtonToMainGui(GUIObj, {label="FluidDrainButton", name="onToggleOption;"..entID..";fluidLaserActivated", sprite=fluidDrainSprite, hovSprite=fluidDrainHovSprite, tooltip={"gui-description.mfFluidDrainButton"}, size=buttonsSize, save=false, visible=showFluidDrainButton})
+	GUI.addButtonToMainGui(GUIObj, {label="ItemDrainButton", name="onToggleOption;"..entID..";itemLaserActivated", sprite=itemDrainSprite, hovSprite=itemDrainHovSprite, tooltip={"gui-description.mfItemDrainButton"}, size=buttonsSize, save=false, visible=showItemDrainButton})
+	GUI.addButtonToMainGui(GUIObj, {label="QuatronDrainButton", name="onToggleOption;"..entID..";quatronLaserActivated", sprite=quatronDrainSprite, hovSprite=quatronDrainHovSprite, tooltip={"gui-description.mfQuatronDrainButton"}, size=buttonsSize, save=false, visible=showQuatronDrainButton})
 
 	GUI.renderMainGuiButtons(GUIObj)
 end
@@ -160,15 +171,11 @@ end
 -- Add a Button to the Main GUI --
 function GUI.addButtonToMainGui(GUIObj, button)
 	if GUIObj.buttonsTable == nil then GUIObj.buttonsTable = {} end
-	GUIObj.buttonsTable[button.name] = button
+	GUIObj.buttonsTable[button.label] = button
 end
 
 -- Render all Buttons of the Main GUI --
 function GUI.renderMainGuiButtons(GUIObj)
-	-- Clear the Frame --
-	GUIObj.MFMainGUIFrame3.clear()
-	-- Make the Frame visible --
-	if GUIObj.MFMainGUIFrame2.visible == true then GUIObj.MFMainGUIFrame3.visible = true end
 	-- Create values --
 	local i = 0
 	local y = 1
@@ -177,7 +184,7 @@ function GUI.renderMainGuiButtons(GUIObj)
 	-- Itinerate the Buttons Table --
 	for k, button in pairs(GUIObj.buttonsTable or {}) do
 		if button.visible == false then goto continue end
-		if GUIObj.MFPlayer.varTable["Show" .. button.name] == false then goto continue end
+		if GUIObj.MFPlayer.varTable["Show"..button.label] == false then goto continue end
 		-- Create a new Flow --
 		if i % 4 == 0 then
 			y = y + 1
@@ -190,4 +197,33 @@ function GUI.renderMainGuiButtons(GUIObj)
 	end
 	-- Make the Frame invisible if no Button was added --
 	if i == 0 then GUIObj.MFMainGUIFrame3.visible = false end
+end
+
+function GUI.onReduceMainGUI(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	-- Get the Main GUI Object --
+	local mainGUI = MFPlayer.GUI["MFMainGUI"]
+	local leftSprite = "ArrowIconLeft"
+	local rightSprite = "ArrowIconRight"
+	if mainGUI.MFPlayer.varTable.MainGUIDirection == "left" then
+		leftSprite = "ArrowIconRight"
+		rightSprite = "ArrowIconLeft"
+	end
+	local columns = ((math.floor((table_size(mainGUI.MFMainGUIFrame3.children)-1 ))))
+	local decal = 138
+	if columns > 0 then decal = decal + 29 + (18 * (columns-1)) end
+	decal = decal * player.display_scale
+	if mainGUI.MFMainGUIFrame2.visible == false then
+		if mainGUI.MFPlayer.varTable.MainGUIDirection == "left" then mainGUI.location = {mainGUI.location.x - decal, mainGUI.location.y} end
+		mainGUI.MFMainGUIFrame2.visible = true
+		mainGUI.MFMainGUIFrame3.visible = true
+		mainGUI.MainGUIReduceButton.sprite = leftSprite
+		mainGUI.MainGUIReduceButton.hovered_sprite = leftSprite
+	else
+		if mainGUI.MFPlayer.varTable.MainGUIDirection == "left" then mainGUI.location = {mainGUI.location.x + decal, mainGUI.location.y} end
+		mainGUI.MFMainGUIFrame2.visible = false
+		mainGUI.MFMainGUIFrame3.visible = false
+		mainGUI.MainGUIReduceButton.sprite = rightSprite
+		mainGUI.MainGUIReduceButton.hovered_sprite = rightSprite
+	end
 end

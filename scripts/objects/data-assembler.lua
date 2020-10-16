@@ -167,7 +167,8 @@ function DA:getTooltipInfos(GUIObj, gui, justCreated)
 		addRFlow.style.bottom_padding = 10
 
 		-- Create the Recipe selector --
-		local recipeSelector = GUIObj:addFilter("DARecipe", addRFlow, {"gui-description.AddRecipeTT"}, true, "recipe", 28)
+		local filterName = global.useVanillaChooseElem == false and "onToggleGui;GUI;RecipeGUI;skipOpen" or ""
+		local recipeSelector = GUIObj:addFilter(filterName, addRFlow, {"gui-description.AddRecipeTT"}, "DARecipe", "recipe", 28)
 		recipeSelector.locked = not global.useVanillaChooseElem
 
 		-- Create the Amount selector --
@@ -175,7 +176,7 @@ function DA:getTooltipInfos(GUIObj, gui, justCreated)
 		amountSelector.style.width = 75
 
 		-- Create the Add Recipe Button --
-		GUIObj:addButton("DAAddR," .. self.entID, addRFlow, "PlusIcon", "PlusIcon", {"gui-description.AddRecipeTT"}, 28)
+		GUIObj:addButton("onAddRecipe;"..self.entID, addRFlow, "PlusIcon", "PlusIcon", {"gui-description.AddRecipeTT"}, 28)
 
 		-- Create the Quatron level Dual Label --
 		GUIObj:addDualLabel(informationFlow, {"gui-description.Quatronlevel"}, string.format("%.3f", self.quatronLevel), _mfOrange, _mfGreen, nil, "", "", "QuatronLevel", true)
@@ -203,6 +204,28 @@ function DA:getTooltipInfos(GUIObj, gui, justCreated)
 	if GUIObj.QuatronLevel ~= nil then GUIObj.QuatronLevel.Label2.caption = string.format("%.3f", self.quatronLevel) end
 	if GUIObj.QuatronCharge ~= nil then GUIObj.QuatronCharge.Label2.caption = math.floor(self.quatronCharge) end
 	
+end
+
+function DA:onAddRecipe(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	local GUIObj = MFPlayer.GUI["MFTooltipGUI"]
+	local recipe = GUIObj.DARecipe.elem_value
+	local amount = GUIObj.DAAmount.text
+	GUIObj.DARecipe.elem_value = nil
+	GUIObj.DAAmount.text = ""
+	self:addRecipe(recipe, amount)
+end
+
+function DA:onRemoveRecipe(event, args)
+	local recipeID = tonumber(args[1])
+	self:removeRecipe(recipeID)
+end
+
+function DA:onSwapRecipe(event, args)
+	local recipeID = tonumber(args[1])
+	local productID = tonumber(args[2])
+	local products = self.recipeTable[recipeID].products
+	products[1], products[productID] = products[productID], products[1]
 end
 
 -- Set Active --
@@ -250,7 +273,7 @@ function DA:createFrame(GUIObj, gui, recipe, id)
 		return
 	end
 	local tooltip = (recipe.amount or 0) > 0 and {"", recipe.recipePrototype.localised_name, " (max:", recipe.amount, ")"} or recipe.recipePrototype.localised_name
-	local recipeButton = GUIObj:addButton("DARem," .. self.entID .. "," .. id, recipeFlow, recipe.sprite, recipe.sprite, tooltip, 50, false, true, recipe.amount)
+	local recipeButton = GUIObj:addButton("onRemoveRecipe;"..self.entID..";"..id, recipeFlow, recipe.sprite, recipe.sprite, tooltip, 50, false, true, recipe.amount)
 	recipeButton.style = (recipe.toManyInInventory == true and "MF_Fake_Button_Red") or "MF_Fake_Button_Green"
 	recipeButton.style.padding = 0
 	recipeButton.style.margin = 0
@@ -293,7 +316,7 @@ function DA:createFrame(GUIObj, gui, recipe, id)
 
 	for key, product in ipairs(recipe.products) do
 		local storedAmount = product.type == "item" and self.dataNetwork:hasItem(product.name) or self.dataNetwork:hasFluid(product.name)
-		local productButton = GUIObj:addButton("DASwap," .. self.entID .. "," .. id .. "," .. key, resultFlow, product.sprite, product.sprite, product.tooltip, 50, false, true, storedAmount or 0)
+		local productButton = GUIObj:addButton("onSwapRecipe;"..self.entID..";"..id..","..key, resultFlow, product.sprite, product.sprite, product.tooltip, 50, false, true, storedAmount or 0)
 		productButton.style = (recipe.inventoryFull == true and "MF_Fake_Button_Red") or "MF_Fake_Button_Green"
 		productButton.style.padding = 0
 		productButton.style.margin = 0

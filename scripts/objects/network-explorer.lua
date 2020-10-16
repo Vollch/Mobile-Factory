@@ -188,11 +188,32 @@ function NE:getTooltipInfos(GUIObj, gui, justCreated)
 	GUIObj:addDualLabel(inventoryFlow, {"", {"gui-description.INVTotalItems"}, ":"}, Util.toRNumber(inv.usedCapacity) .. "/" .. Util.toRNumber(inv.maxCapacity), _mfOrange, _mfGreen, nil, nil, inv.usedCapacity .. "/" .. inv.maxCapacity)
 
 	-- Create the Inventory List --
-	createDNInventoryFrame(GUIObj, inventoryScrollPane, GUIObj.MFPlayer, "NE," .. self.entID .. ",", self.dataNetwork.invObj, 8, true, true, true, searchText, self)
+	createDNInventoryFrame(GUIObj, inventoryScrollPane, GUIObj.MFPlayer, self.entID, self.dataNetwork.invObj, 8, true, true, true, searchText, self)
 
 	-- Create the Player Inventory List --
-	createPlayerInventoryFrame(GUIObj, playerInventoryScrollPane, GUIObj.MFPlayer, 8, "NE," .. self.entID .. ",", searchText)
+	createPlayerInventoryFrame(GUIObj, playerInventoryScrollPane, GUIObj.MFPlayer, 8, self.entID, searchText)
 	
+end
+
+function NE:onDNStorageItemClicked(event, args)
+	local storage = global.deepStorageTable[args[1]]
+	local count = Util.getEventCount(event)
+	local MFPlayer = getMFPlayer(event.player_index)
+	self:transferItemsFromDS(MFPlayer.ent.get_main_inventory(), storage, count)
+end
+
+function NE:onDNItemClicked(event, args)
+	local name = args[1]
+	local count = Util.getEventCount(event)
+	local MFPlayer = getMFPlayer(event.player_index)
+	self:transferItemsFromDNInv(MFPlayer.ent.get_main_inventory(), name, count)
+end
+
+function NE:onPlayerItemClicked(event, args)
+	local name = args[1]
+	local count = Util.getEventCount(event)
+	local MFPlayer = getMFPlayer(event.player_index)
+	self:transferItemsFromPInv(MFPlayer.ent.get_main_inventory(), MFPlayer.name, name, count)
 end
 
 -- Set Active --
@@ -210,7 +231,7 @@ function NE:setActive(set)
 end
 
 -- Transfer Items from Deep Storage --
-function NE.transferItemsFromDS(DS, inv, count)
+function NE:transferItemsFromDS(inv, DS, count)
 	
 	-- Check all values --
 	if DS == nil or inv == nil then return end
@@ -233,11 +254,11 @@ function NE.transferItemsFromDS(DS, inv, count)
 end
 
 -- Transfer Items from Data Network Inventory --
-function NE.transferItemsFromDNInv(NE, inv, item, count)
+function NE:transferItemsFromDNInv(inv, item, count)
 
 	-- Check all values --
-	if NE == nil or inv == nil then return end
-	local DNInv = NE.dataNetwork.invObj
+	if inv == nil then return end
+	local DNInv = self.dataNetwork.invObj
 	if item == nil or game.item_prototypes[item] == nil then return end
 	local half = (count or 1) < 1 and true or false
 	if count == nil or count <= 0 then count = game.item_prototypes[item].stack_size end
@@ -256,11 +277,11 @@ function NE.transferItemsFromDNInv(NE, inv, item, count)
 end
 
 -- Transfer Items from the Player Inventory --
-function NE.transferItemsFromPInv(PInv, PName, NE, item, count)
+function NE:transferItemsFromPInv(PInv, PName, item, count)
 
 	-- Check all values --
-	if PInv == nil or NE == nil then return end
-	local DNInv = NE.dataNetwork.invObj
+	if PInv == nil then return end
+	local DNInv = self.dataNetwork.invObj
 	if item == nil or game.item_prototypes[item] == nil then return end
 	local half = (count or 1) < 1 and true or false
 	if count == nil or count <= 0 then count = game.item_prototypes[item].stack_size end
@@ -271,7 +292,7 @@ function NE.transferItemsFromPInv(PInv, PName, NE, item, count)
 	if half == true then amount = math.floor(amount/2) end
 
 	-- Try to send the Items to a Deep Storage --
-	for k, deepStorage in pairs(NE.dataNetwork.DSRTable) do
+	for k, deepStorage in pairs(self.dataNetwork.DSRTable) do
 		if deepStorage:canAccept(item) then
 			inserted = deepStorage:addItem(item, amount)
 			break

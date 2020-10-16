@@ -120,8 +120,8 @@ function MI:getTooltipInfos(GUIObj, gui, justCreated)
 	GUIObj:addDataNetworkFrame(gui, self)
 
 	-- Update the Filter --
-	if game.item_prototypes[self.selectedFilter] ~= nil and GUIObj["MIFilter" .. tostring(self.ent.unit_number)] ~= nil then
-		GUIObj["MIFilter" .. tostring(self.ent.unit_number)].elem_value = self.selectedFilter
+	if game.item_prototypes[self.selectedFilter] ~= nil and GUIObj["onChangeFilter;" .. tostring(self.ent.unit_number)] ~= nil then
+		GUIObj["onChangeFilter;" .. tostring(self.ent.unit_number)].elem_value = self.selectedFilter
 	end
 
 	if justCreated ~= true then return end
@@ -134,7 +134,7 @@ function MI:getTooltipInfos(GUIObj, gui, justCreated)
 	GUIObj:addDualLabel(frame, {"", {"gui-description.Filter"}, ":"}, filterName, _mfOrange, _mfGreen)
 
 	-- Create the Inventory Button --
-	GUIObj:addSimpleButton("MIOpenI," .. tostring(self.ent.unit_number), frame, {"gui-description.OpenInventory"})
+	GUIObj:addSimpleButton("onOpenInventory;"..self.entID, frame, {"gui-description.OpenInventory"})
 	
 	-- Check if the Parameters can be modified --
 	if valid(self.dataNetwork) == false then return end
@@ -149,14 +149,14 @@ function MI:getTooltipInfos(GUIObj, gui, justCreated)
 
 	-- Create the Filter Selection --
 	GUIObj:addLabel("", titleFrame, {"gui-description.ChangeFilter"}, _mfOrange)
-	local filter = GUIObj:addFilter("MIFilter" .. tostring(self.ent.unit_number), titleFrame, {"gui-description.FilterSelect"}, true, "item", 40)
+	local filter = GUIObj:addFilter("onChangeFilter;"..self.entID, titleFrame, {"gui-description.FilterSelect"}, true, "item", 40)
 	if game.item_prototypes[self.selectedFilter] ~= nil then filter.elem_value = self.selectedFilter end
 
 	-- Create the Mode Selection --
 	GUIObj:addLabel("", titleFrame, {"gui-description.SelectMode"}, _mfOrange)
 	local state = "left"
 	if self.selectedMode == "output" then state = "right" end
-	GUIObj:addSwitch("MIMode" .. self.ent.unit_number, titleFrame, {"gui-description.Input"}, {"gui-description.Output"}, {"gui-description.InputTT"}, {"gui-description.OutputTT"}, state)
+	GUIObj:addSwitch("onChangeMode;"..self.entID, titleFrame, {"gui-description.Input"}, {"gui-description.Output"}, {"gui-description.InputTT"}, {"gui-description.OutputTT"}, state)
 
 	--prevent item-with-tags from being stored, allow retrieval (0.0.197+) - workaround until we record tags
 	if self.selectedMode == "input"
@@ -202,42 +202,32 @@ function MI:getTooltipInfos(GUIObj, gui, justCreated)
 		end
 	end
 	if selectedIndex > table_size(invs) then selectedIndex = nil end
-	GUIObj:addDropDown("MITarget" .. self.ent.unit_number, titleFrame, invs, selectedIndex)
+	GUIObj:addDropDown("onChangeInventory;"..self.entID, titleFrame, invs, selectedIndex)
 end
 
 -- Change the Mode --
-function MI:changeMode(mode)
-    if mode == "left" then
-        self.selectedMode = "input"
-    elseif mode == "right" then
-        self.selectedMode = "output"
-    end
-end
-
--- Change the Target Player --
-function MI:changePlayer(playerName)
-    if type(playerName) ~= "string" then return end
-	lastSelectedPlayer = self.selectedPlayer
-
-	if game.players[playerName] then
-		self.selectedPlayer = playerName
-	else
-		self.selectedPlayer = self.player
+function MI:onChangeMode(event, args)
+	local mode = event.element.switch_state
+	if mode == "left" then
+		self.selectedMode = "input"
+	elseif mode == "right" then
+		self.selectedMode = "output"
 	end
 end
 
 -- Change the Targeted Inventory --
-function MI:changeInventory(ID)
+function MI:onChangeInventory(event, args)
 	-- Check the ID --
-    if ID == nil then
-        self.selectedInv = nil
-        return
-    end
+	local ID = tonumber(event.element.items[event.element.selected_index][5])
+	if ID == nil then
+		self.selectedInv = nil
+		return
+	end
 
-    if ID == 0 then
-        self.selectedInv = self.dataNetwork.invObj
-        return
-    end
+	if ID == 0 then
+		self.selectedInv = self.dataNetwork.invObj
+		return
+	end
 
 	-- Select the Inventory --
 	self.selectedInv = nil
@@ -251,6 +241,18 @@ function MI:changeInventory(ID)
 			end
 		end
 	end
+end
+
+function MI:onChangeFilter(event, args)
+	self.selectedFilter = event.element.elem_value
+end
+
+function MI:onOpenInventory(event, args)
+	local playerIndex = event.player_index
+	local player = getPlayer(playerIndex)
+	local MFPlayer = getMFPlayer(playerIndex)
+	MFPlayer.varTable.bypassGUI = true
+	player.opened = self.ent
 end
 
 -- Set Active --

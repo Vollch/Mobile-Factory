@@ -1,5 +1,5 @@
 -- Create the TP GUI --
-function GUI.createTPGui(player)
+function GUI.createMFTPGUI(player)
 
 	-- Create the GUI --
 	local GUIObj = GUI.createGUI("MFTPGUI", getMFPlayer(player.name), "vertical", true, 0, 0)
@@ -132,7 +132,7 @@ function GUI.updateLocation(GUIObj)
 
         -- Add the TP Button --
         local icon = (loc.filter ~= nil and game.recipe_prototypes[loc.filter] ~= nil) and ("recipe/" .. loc.filter) or "MFJDIcon"
-        local button = GUIObj:addButton("TPGUILoc," .. name, infoFlow, icon, icon, {"gui-description.StartJump"}, 40)
+        local button = GUIObj:addButton("onClickTPLocation;GUI;"..name, infoFlow, icon, icon, {"gui-description.StartJump"}, 40)
         button.style = canTP == true and "shortcut_bar_button_green" or "MF_Fake_Button_Red"
         button.style.padding = 0
 	    button.style.margin = 0
@@ -190,7 +190,7 @@ function GUI.updateAddLocation(GUIObj)
         local filter = GUIObj:addFilter("AddLocFilter", addLocFlow, {"gui-description.AddLocationFilterTT"}, true, "recipe", 28)
 
         -- Create the Add Location Button --
-        GUIObj:addButton("TPGUIAddLoc,", addLocFlow, "PlusIcon", "PlusIcon", {"gui-description.AddLocationButtonTT"}, 28)
+        GUIObj:addButton("onAddTPLocation;GUI", addLocFlow, "PlusIcon", "PlusIcon", {"gui-description.AddLocationButtonTT"}, 28)
 
         -- Add Line --
         GUIObj:addLine("", locFlow, "horizontal")
@@ -203,4 +203,27 @@ function GUI.updateAddLocation(GUIObj)
 
 
     end
+end
+
+-- If a location is added --
+function GUI.onAddTPLocation(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	local GUIObj = MFPlayer.GUI["MFTPGUI"]
+	local jumpDrive = GUIObj.MF.jumpDriveObj
+	jumpDrive:addLocation(GUIObj.AddLocName.text, GUIObj.AddLocFilter.elem_value)
+end
+
+function GUI.onClickTPLocation(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	local GUIObj = MFPlayer.GUI["MFTPGUI"]
+	local jumpDrive = GUIObj.MF.jumpDriveObj
+	local location = args[1]
+	-- Start the Jump --
+	if event.button == defines.mouse_button_type.left then
+		jumpDrive:jump(location)
+	end
+	-- Remove a Location --
+	if event.button == defines.mouse_button_type.right then
+		jumpDrive:removeLocation(location)
+	end
 end

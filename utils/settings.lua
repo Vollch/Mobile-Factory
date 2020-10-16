@@ -204,6 +204,11 @@ _mfTooltipGUI =
     NetworkController = "entsTable"
 }
 
+_mfGUIMessage =
+{
+	locked = {on={"gui-description.MFLocked"}, off={"gui-description.MFUnlocked"}}
+}
+
 -- Event Tick --
 _eventTick5=5 -- Teleportation --
 _eventTick7=7 -- Data Assembler GUI Progress Bars --

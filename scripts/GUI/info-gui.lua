@@ -1,5 +1,5 @@
 -- Create the Info GUI --
-function GUI.createInfoGui(player)
+function GUI.createMFInfoGUI(player)
 
 	-- Create the GUI --
 	local GUIObj = GUI.createGUI("MFInfoGUI", getMFPlayer(player.name), "vertical", true, 0, 0)
@@ -93,12 +93,15 @@ function GUI.updateButtonsBar(GUIObj)
 
 	-- Clear the Bar --
 	buttonsBar.clear()
+	-- No need to show buttons if player don't have MF
+	if MF.ent == nil then return end
+	local entID = MF.ent.valid and MF.ent.unit_number or 0
 
 	-------------------------------------------------------- Get Buttons Variables --------------------------------------------------------
 	local showCallMFButton = technologyUnlocked("JumpDrive", getForce(player.name))
 	local syncAreaSprite = MF.syncAreaEnabled == true and "SyncAreaIcon" or "SyncAreaIconDisabled"
 	local syncAreaHovSprite = MF.syncAreaEnabled == true and "SyncAreaIconDisabled" or "SyncAreaIcon"
-	local showFindMFButton = (MF.ent ~= nil and MF.ent.valid == false) and true or false
+	local showFindMFButton = MF.ent.valid == false and true or false
 	local tpInsideSprite = MF.tpEnabled == true and "MFTPIcon" or "MFTPIconDisabled"
 	local tpInsideHovSprite = MF.tpEnabled == true and "MFTPIconDisabled" or "MFTPIcon"
 	local lockMFSprite = MF.locked == true and "LockMFCIcon" or "LockMFOIcon"
@@ -119,16 +122,16 @@ function GUI.updateButtonsBar(GUIObj)
 
 	-------------------------------------------------------- Update all Buttons --------------------------------------------------------
 	local buttonsSize = 20
-	GUIObj:addButton("PortOutsideButton", buttonsBar, "PortIcon", "PortIcon", {"gui-description.teleportOutsideButton"}, buttonsSize, true)
-	GUIObj:addButton("SyncAreaButton", buttonsBar, syncAreaSprite, syncAreaHovSprite, {"gui-description.syncAreaButton"}, buttonsSize, true)
-	GUIObj:addButton("FindMFButton", buttonsBar, "MFIconExc", "MFIconExc", {"gui-description.fixMFButton"}, buttonsSize, true, showFindMFButton)
-	GUIObj:addButton("TPInsideButton", buttonsBar, tpInsideSprite, tpInsideHovSprite, {"gui-description.MFTPInside"}, buttonsSize, true)
-	GUIObj:addButton("LockMFButton", buttonsBar, lockMFSprite, lockMFHovSprite, {"gui-description.LockMF"}, buttonsSize, true)
-	GUIObj:addButton("JumpDriveButton", buttonsBar, "MFJDIcon", "MFJDIcon", {"gui-description.jumpDriveButton"}, buttonsSize, true, showCallMFButton)
-	GUIObj:addButton("EnergyDrainButton", buttonsBar, energyDrainSprite, energyDrainHovSprite, {"gui-description.mfEnergyDrainButton"}, buttonsSize, true, showEnergyDrainButton)
-	GUIObj:addButton("FluidDrainButton", buttonsBar, fluidDrainSprite, fluidDrainHovSprite, {"gui-description.mfFluidDrainButton"}, buttonsSize, true, showFluidDrainButton)
-	GUIObj:addButton("ItemDrainButton", buttonsBar, itemDrainSprite, itemDrainHovSprite, {"gui-description.mfItemDrainButton"}, buttonsSize, true, showItemDrainButton)
-	GUIObj:addButton("QuatronDrainButton", buttonsBar, quatronDrainSprite, quatronDrainHovSprite, {"gui-description.mfQuatronDrainButton"}, buttonsSize, true, showQuatronDrainButton)
+	GUIObj:addButton("onTeleportOutside;GUI", buttonsBar, "PortIcon", "PortIcon", {"gui-description.teleportOutsideButton"}, buttonsSize)
+	GUIObj:addButton("onToggleOption;"..entID..";syncAreaEnabled", buttonsBar, syncAreaSprite, syncAreaHovSprite, {"gui-description.syncAreaButton"}, buttonsSize)
+	GUIObj:addButton("fixMF;Util", buttonsBar, "MFIconExc", "MFIconExc", {"gui-description.fixMFButton"}, buttonsSize, false, showFindMFButton)
+	GUIObj:addButton("onToggleOption;"..entID..";tpEnabled", buttonsBar, tpInsideSprite, tpInsideHovSprite, {"gui-description.MFTPInside"}, buttonsSize)
+	GUIObj:addButton("onToggleOption;"..entID..";locked", buttonsBar, lockMFSprite, lockMFHovSprite, {"gui-description.LockMF"}, buttonsSize)
+	GUIObj:addButton("onToggleGui;GUI;MFTPGUI", buttonsBar, "MFJDIcon", "MFJDIcon", {"gui-description.jumpDriveButton"}, buttonsSize, true, showCallMFButton)
+	GUIObj:addButton("onToggleOption;"..entID..";energyLaserActivated", buttonsBar, energyDrainSprite, energyDrainHovSprite, {"gui-description.mfEnergyDrainButton"}, buttonsSize, showEnergyDrainButton)
+	GUIObj:addButton("onToggleOption;"..entID..";fluidLaserActivated", buttonsBar, fluidDrainSprite, fluidDrainHovSprite, {"gui-description.mfFluidDrainButton"}, buttonsSize, showFluidDrainButton)
+	GUIObj:addButton("onToggleOption;"..entID..";itemLaserActivated", buttonsBar, itemDrainSprite, itemDrainHovSprite, {"gui-description.mfItemDrainButton"}, buttonsSize, showItemDrainButton)
+	GUIObj:addButton("onToggleOption;"..entID..";quatronLaserActivated", buttonsBar, quatronDrainSprite, quatronDrainHovSprite, {"gui-description.mfQuatronDrainButton"}, buttonsSize, showQuatronDrainButton)
 end
 
 -- Update Information --
@@ -268,7 +271,7 @@ function GUI.updateTankFrame(GUIObj)
 			sprite = "item/DeepTank"
 			fAmount = nil
 		end
-		local button = GUIObj:addButton("DTB" .. tostring(k), frame, sprite, sprite, tankText, 35, false, true, fAmount)
+		local button = GUIObj:addButton("onDNTankClicked;GUI;"..tostring(k), frame, sprite, sprite, tankText, 35, false, true, fAmount)
 		button.style = "MF_Purple_Button_Purple"
 
 		-- Create the flow --
@@ -308,7 +311,7 @@ function GUI.updateDeepTankInfo(GUIObj, id)
 	GUIObj:addDualLabel(gui, {"", {"gui-description.Filter"}, ":"}, Util.getLocFluidName(deepTank.filter) or {"gui-description.None"}, _mfOrange, _mfGreen)
 
 	-- Create the Filter --
-	local TankFilter = GUIObj:addFilter("TF" .. tostring(id), gui, {"gui-description.FilterSelect"}, true, "fluid", 25)
+	local TankFilter = GUIObj:addFilter("onChangeFilter;"..tostring(id), gui, {"gui-description.FilterSelect"}, true, "fluid", 25)
 
 	-- Set the Filter --
 	if game.fluid_prototypes[deepTank.filter] ~= nil  then
@@ -350,7 +353,7 @@ function GUI.updateDeepStorageFrame(GUIObj)
 			sprite = "item/DeepStorage"
 			fAmount = nil
 		end
-		local button = GUIObj:addButton("DSRB" .. tostring(k), frame, sprite, sprite, storageText, 35, false, true, fAmount)
+		local button = GUIObj:addButton("onDNStorageClicked;GUI;"..tostring(k), frame, sprite, sprite, storageText, 35, false, true, fAmount)
 		button.style = "shortcut_bar_button_green"
 
 		-- Create the flow --
@@ -388,7 +391,7 @@ function GUI.updateDeepStorageInfo(GUIObj, id)
 	GUIObj:addDualLabel(gui, {"", {"gui-description.Filter"}, ":"}, Util.getLocItemName(deepStorage.filter) or {"gui-description.None"}, _mfOrange, _mfGreen)
 
 	-- Create the Filter --
-	local StorageFilter = GUIObj:addFilter("DSRF" .. tostring(id), gui, {"gui-description.FilterSelect"}, true, "item", 25)
+	local StorageFilter = GUIObj:addFilter("onChangeFilter;"..tostring(id), gui, {"gui-description.FilterSelect"}, true, "item", 25)
 
 	-- Save the Filter --
 	if game.item_prototypes[deepStorage.filter] ~= nil  then
@@ -411,7 +414,7 @@ function GUI.updateInventoryFrame(GUIObj)
 	InventoryScrollPanel.clear()
 
 	-- Create the Inventory List --
-	createDNInventoryFrame(GUIObj, InventoryScrollPanel, GUIObj.MFPlayer, "INV", MF.II, 5, true, true, true)
+	createDNInventoryFrame(GUIObj, InventoryScrollPanel, GUIObj.MFPlayer, "GUI", MF.II, 5, true, true, true)
 
 	-- Clean the Inventory Information Flow --
 	GUIObj.InventoryInfoFlow.clear()
@@ -471,4 +474,41 @@ function GUI.updateInventoryInfo(GUIObj, id, type, name, amount)
 	GUIObj:addDualLabel(inventoryItemFlow, {"", {"gui-description.Count"}, ": "}, count, _mfOrange, _mfGreen)
 	GUIObj:addDualLabel(inventoryItemFlow, {"", {"gui-description.InventoryLocation"}, ": "}, location, _mfOrange, _mfGreen)
 
+end
+
+-- Info GUI Inventory Item Button -> Deep Storage --
+function GUI.onDNStorageItemClicked(event, args)
+	local storage = args[1]
+	local MFPlayer = getMFPlayer(event.player_index)
+	GUI.updateInventoryInfo(MFPlayer.GUI["MFInfoGUI"], storage, "DSR")
+end
+
+-- Info GUI Inventory Item Button -> Deep Tank --
+function GUI.onDNTankItemClicked(event, args)
+	local tank = args[1]
+	local MFPlayer = getMFPlayer(event.player_index)
+	GUI.updateInventoryInfo(MFPlayer.GUI["MFInfoGUI"], tank, "DT")
+end
+
+-- Info GUI Inventory Item Button -> Inventory --
+function GUI.onDNItemClicked(event, args)
+	local name = args[1]
+	local count = args[2]
+	local MFPlayer = getMFPlayer(event.player_index)
+	GUI.updateInventoryInfo(MFPlayer.GUI["MFInfoGUI"], nil, "INV", name, count)
+end
+
+-- Info GUI Deep Storage Button --
+function GUI.onDNStorageClicked(event, args)
+	local storage = args[1]
+	local MFPlayer = getMFPlayer(event.player_index)
+	GUI.updateDeepStorageInfo(MFPlayer.GUI["MFInfoGUI"], storage)
+end
+
+-- Info GUI Deep Tank Button --
+function GUI.onDNTankClicked(event, args)
+	local tank = args[1]
+	local MFPlayer = getMFPlayer(event.player_index)
+	game.print(tank)
+	GUI.updateDeepTankInfo(MFPlayer.GUI["MFInfoGUI"], tank)
 end

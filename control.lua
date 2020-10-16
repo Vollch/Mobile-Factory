@@ -80,7 +80,7 @@ function onInit()
 		end
 	end
 
-    global.syncTile = global.syncTile or "dirt-7"
+	global.syncTile = global.syncTile or "dirt-7"
 	-- Validate the Tile Used for the Sync Area --
 	validateSyncAreaTile()
 	-- Ensure All Needed Tiles are Present --
@@ -90,7 +90,7 @@ function onInit()
 	rendering.clear("Mobile_Factory")
 
 	-- Recreate GUIs --
-	for k, MFPlayer in pairs(global.MFPlayer or {}) do
+	for k, MFPlayer in pairs(global.playersTable or {}) do
 		GUI.createMFMainGUI(MFPlayer.ent)
 	end
 
@@ -238,13 +238,13 @@ script.on_event(defines.events.on_entity_died, onEntityIsDestroyed, _mfEntityFil
 script.on_event(defines.events.on_post_entity_died, onGhostPlacedByDie, _mfEntityFilter)
 script.on_event(defines.events.on_gui_opened, GUI.guiOpened)
 script.on_event(defines.events.on_gui_closed, GUI.guiClosed)
-script.on_event(defines.events.on_gui_click, GUI.buttonClicked)
-script.on_event(defines.events.on_gui_elem_changed, GUI.onGuiElemChanged)
-script.on_event(defines.events.on_gui_checked_state_changed, GUI.onGuiElemChanged)
-script.on_event(defines.events.on_gui_selection_state_changed, GUI.onGuiElemChanged)
-script.on_event(defines.events.on_gui_text_changed, GUI.onGuiElemChanged)
-script.on_event(defines.events.on_gui_switch_state_changed, GUI.onGuiElemChanged)
-script.on_event(defines.events.on_gui_selected_tab_changed, GUI.onGuiElemChanged)
+script.on_event(defines.events.on_gui_click, GUI.onGuiEvent)
+script.on_event(defines.events.on_gui_elem_changed, GUI.onGuiEvent)
+script.on_event(defines.events.on_gui_checked_state_changed, GUI.onGuiEvent)
+script.on_event(defines.events.on_gui_selection_state_changed, GUI.onGuiEvent)
+script.on_event(defines.events.on_gui_text_changed, GUI.onGuiEvent)
+script.on_event(defines.events.on_gui_switch_state_changed, GUI.onGuiEvent)
+script.on_event(defines.events.on_gui_selected_tab_changed, GUI.onGuiEvent)
 script.on_event(defines.events.on_research_finished, technologyFinished)
 script.on_event(defines.events.on_selected_entity_changed, selectedEntityChanged)
 script.on_event(defines.events.on_entity_settings_pasted, settingsPasted)

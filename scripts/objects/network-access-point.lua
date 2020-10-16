@@ -123,7 +123,7 @@ function NAP:getTooltipInfos(GUIObj, gui, justCreated)
 
         -- Create the Area Show/Hide Switch --
         GUIObj:addLabel("", informationTitle, {"", {"gui-description.ShowNAPArea"}, ":"}, _mfOrange)
-        GUIObj:addSwitch("NAPAreaSwitch," .. self.ent.unit_number, informationTitle, {"gui-description.Off"}, {"gui-description.On"}, "", "", self.showArea == true and "right")
+        GUIObj:addSwitch("onAreaSwitch;"..self.entID, informationTitle, {"gui-description.Off"}, {"gui-description.On"}, "", "", self.showArea == true and "right")
 
         -- Create the Information Flow --
         informationFlow = GUIObj:addFlow("InformationFlow", informationTitle, "vertical", true)
@@ -136,6 +136,14 @@ function NAP:getTooltipInfos(GUIObj, gui, justCreated)
     GUIObj:addLabel("", informationFlow, {"", {"gui-description.QuatronCharge"}, ":"}, _mfOrange)
     GUIObj:addProgressBar("", informationFlow, "", self.quatronCharge .. "/" .. self.quatronMax, false, _mfPurple, self.quatronCharge/self.quatronMax, 100)
 
+end
+
+function NAP:onAreaSwitch(event, args)
+	if event.element.switch_state == "left" then
+		self.showArea = false
+	else
+		self.showArea = true
+	end
 end
 
 -- Create all Signals --

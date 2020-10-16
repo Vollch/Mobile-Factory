@@ -10,7 +10,7 @@ function GUI.createRecipeGUI(player)
 	GUIObj:addEmptyWidget("", topBarFlow, GUIObj.gui, 20, nil)
 	textField = GUIObj:addTextField("RSSearchTextField", topBarFlow, "", {"gui-description.ItemSearchTextTT"}, true, false, false, false, false)
 	textField.style.maximal_width = 100
-	GUIObj:addButton("RecipeGUICloseButton", topBarFlow, "CloseIcon", "CloseIcon", {"gui-description.closeButton"}, 15)
+	GUIObj:addButton("onToggleGui;GUI;RecipeGUI", topBarFlow, "CloseIcon", "CloseIcon", {"gui-description.closeButton"}, 15)
 
 	-- Cerate Main Frame
 	local RSMainFrame = GUIObj:addFrame("RSMainFrame", GUIObj.gui, "vertical")
@@ -66,13 +66,12 @@ function GUI.createRecipeGUI(player)
 
 	-- Draw Categories
 	for idx, group in ipairs(groupsArray) do
-		local name = "RSCat," .. idx
+		local name = "onSelectRecipeCategory;GUI;" .. idx
 		local tab = RSGroupTable.add({type="sprite-button", name=name, style="filter_group_button_tab_selectable"})
-		GUIObj[name] = tab
+		GUIObj["catButton"..idx] = tab
 		if idx == 1 then tab.enabled = false end
 		tab.tooltip = group.obj.localised_name
 		tab.sprite = "item-group/" .. group.obj.name
-
 	end
 
 	GUIObj.sortedRecipes = groupsArray
@@ -114,10 +113,33 @@ function GUI.doUpdateRecipeGUI(GUIObj)
 					local locName = tmpLocal[Util.getLocRecipeName(name)[1]]
 					if locName ~= nil and string.match(string.lower(locName), filter) == nil then goto continue end
 			end
-			local button = RSRecipeTable.add({type="choose-elem-button", elem_type="recipe", name="RSSel,"..name, style="recipe_slot_button"})
+			local button = RSRecipeTable.add({type="choose-elem-button", elem_type="recipe", name="onSelectRecipe;GUI;"..name, style="recipe_slot_button"})
 			button.elem_value = name
 			button.locked = true
 			::continue::
 		end
 	end
+end
+
+function GUI.onSelectRecipeCategory(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	local GUIObj = MFPlayer.GUI["RecipeGUI"]
+	local category = args[1]
+	GUIObj["catButton"..GUIObj.selectedCategory].enabled = true
+	GUIObj["catButton"..category].enabled = false
+	GUIObj.selectedCategory = category
+	GUI.doUpdateRecipeGUI(GUIObj)
+end
+
+
+function GUI.onSelectRecipe(event, args)
+	local MFPlayer = getMFPlayer(event.player_index)
+	local GUIObj = MFPlayer.GUI["RecipeGUI"]
+	local recipe = args[1]
+	local tGUI = MFPlayer.GUI["MFTooltipGUI"]
+	if tGUI ~= nil and tGUI.DA ~= nil then
+		tGUI.DARecipe.elem_value = recipe
+	end
+	MFPlayer.GUI["RecipeGUI"].destroy()
+	MFPlayer.GUI["RecipeGUI"] = nil
 end

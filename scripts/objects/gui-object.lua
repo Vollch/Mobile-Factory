@@ -236,8 +236,12 @@ function GO:addButton(name, gui, sprite, hovSprite, tooltip, size, save, visible
 	button.style.padding = 0
     button.style.margin = 0
     -- Save the Button inside the elements Table --
-    if save == true then
-        self.elements[name] = button
+    if save then
+      if save == true then
+        self.elements[name] = filter
+      else
+        self.elements[save] = filter
+      end
     end
     return button
 end
@@ -373,8 +377,12 @@ function GO:addFilter(name, gui, tooltip, save, elemType, size)
     filter.style.height = size
     filter.style.width = size
     -- Save the Filter inside the elements Table --
-    if save == true then
+    if save then
+      if save == true then
         self.elements[name] = filter
+      else
+        self.elements[save] = filter
+      end
     end
     return filter
 end
@@ -439,7 +447,7 @@ function GO:addDataNetworkFrame(gui, obj)
 end
 
 -- Create a Data Network Inventory Frame --
-function createDNInventoryFrame(GUIObj, gui, MFPlayer, buttonFirstName, inventory, columnsNumber, showDeepTank, showDeepStorage, showInventory, filter, ne)
+function createDNInventoryFrame(GUIObj, gui, MFPlayer, CBObj, inventory, columnsNumber, showDeepTank, showDeepStorage, showInventory, filter, ne)
 
     -- Create the Table --
     local table = GUIObj:addTable("", gui, columnsNumber or 5)
@@ -459,7 +467,7 @@ function createDNInventoryFrame(GUIObj, gui, MFPlayer, buttonFirstName, inventor
                 if filter ~= nil and filter ~= "" and locName ~= nil and string.match(string.lower(locName), string.lower(filter)) == nil then goto continue end
             end
             -- Create the Button --
-            local buttonName = buttonFirstName .. "BDT" .. "," .. deepTank.ent.unit_number
+            local buttonName = "onDNTankItemClicked;"..CBObj..";"..deepTank.ent.unit_number
             local button = GUIObj:addButton(buttonName, table, "fluid/" .. name, "fluid/" .. name, {"", Util.getLocFluidName(name), ": ", Util.toRNumber(count)}, 37, true, true, count)
             button.style = "MF_Purple_Button_Purple"
             button.style.padding = 0
@@ -483,7 +491,7 @@ function createDNInventoryFrame(GUIObj, gui, MFPlayer, buttonFirstName, inventor
                 if filter ~= nil and filter ~= "" and locName ~= nil and string.match(string.lower(locName), string.lower(filter)) == nil then goto continue end
             end
             -- Create the Button --
-            local buttonName = buttonFirstName .. "BDSR" .. "," .. deepStorage.ent.unit_number
+            local buttonName = "onDNStorageItemClicked;"..CBObj..";"..deepStorage.ent.unit_number
             local button = GUIObj:addButton(buttonName, table, "item/" .. name, "item/" .. name, {"", Util.getLocItemName(name), ": ", Util.toRNumber(count)}, 37, true, true, count)
             button.style = "shortcut_bar_button_green"
             button.style.padding = 0
@@ -503,7 +511,7 @@ function createDNInventoryFrame(GUIObj, gui, MFPlayer, buttonFirstName, inventor
                 if filter ~= nil and filter ~= "" and locName ~= nil and string.match(string.lower(locName), string.lower(filter)) == nil then goto continue end
             end
             -- Create the Button --
-            local buttonName = buttonFirstName .. "BINV" .. "," .. name .. "," .. count
+            local buttonName = "onDNItemClicked;"..CBObj..";"..name..","..count
             local button = GUIObj:addButton(buttonName, table, "item/" .. name, "item/" .. name, {"", Util.getLocItemName(name), ": ", Util.toRNumber(count)}, 37, true, true, count)
             button.style = "shortcut_bar_button_blue"
             button.style.padding = 0
@@ -513,7 +521,7 @@ function createDNInventoryFrame(GUIObj, gui, MFPlayer, buttonFirstName, inventor
     end
 end
 
-function createPlayerInventoryFrame(GUIObj, gui, MFPlayer, columnsNumber, buttonFirstName, filter)
+function createPlayerInventoryFrame(GUIObj, gui, MFPlayer, columnsNumber, CBObj, filter)
 
     -- Create the Table --
     local table = GUIObj:addTable("", gui, columnsNumber or 5)
@@ -529,7 +537,7 @@ function createPlayerInventoryFrame(GUIObj, gui, MFPlayer, columnsNumber, button
             if filter ~= nil and filter ~= "" and locName ~= nil and string.match(string.lower(locName), string.lower(filter)) == nil then goto continue end
         end
         -- Create the Button --
-        local buttonName = buttonFirstName .. "BPINV" .. "," .. name .. "," .. count
+        local buttonName = "onPlayerItemClicked;"..CBObj..";"..name..","..count
         local button = GUIObj:addButton(buttonName, table, "item/" .. name, "item/" .. name, {"", Util.getLocItemName(name), ": ", Util.toRNumber(count)}, 37, true, true, count)
         button.style = "shortcut_bar_button_blue"
         button.style.padding = 0
