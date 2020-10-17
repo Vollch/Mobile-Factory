@@ -158,6 +158,7 @@ function DTK:getTooltipInfos(GUIObj, gui, justCreated)
 end
 
 function DTK:onChangeFilter(event, args)
+	if event.name ~= defines.input_action.gui_elem_changed then return false end
 	local MFPlayer = getMFPlayer(event.player_index)
 	self.filter = event.element.elem_value
 	if MFPlayer.GUI["MFInfoGUI"] ~= nil then

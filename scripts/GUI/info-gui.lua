@@ -310,7 +310,7 @@ function GUI.updateDeepTankInfo(GUIObj, id)
 	GUIObj:addDualLabel(gui, {"", {"gui-description.Filter"}, ":"}, Util.getLocFluidName(deepTank.filter) or {"gui-description.None"}, _mfOrange, _mfGreen)
 
 	-- Create the Filter --
-	local TankFilter = GUIObj:addFilter("onChangeFilter;"..tostring(id), gui, {"gui-description.FilterSelect"}, true, "fluid", 25)
+	local TankFilter = GUIObj:addFilter("onChangeFilter;"..id, gui, {"gui-description.FilterSelect"}, true, "fluid", 25)
 
 	-- Set the Filter --
 	if game.fluid_prototypes[deepTank.filter] ~= nil  then
@@ -390,7 +390,7 @@ function GUI.updateDeepStorageInfo(GUIObj, id)
 	GUIObj:addDualLabel(gui, {"", {"gui-description.Filter"}, ":"}, Util.getLocItemName(deepStorage.filter) or {"gui-description.None"}, _mfOrange, _mfGreen)
 
 	-- Create the Filter --
-	local StorageFilter = GUIObj:addFilter("onChangeFilter;"..tostring(id), gui, {"gui-description.FilterSelect"}, true, "item", 25)
+	local StorageFilter = GUIObj:addFilter("onChangeFilter;"..id, gui, {"gui-description.FilterSelect"}, true, "item", 25)
 
 	-- Save the Filter --
 	if game.item_prototypes[deepStorage.filter] ~= nil  then

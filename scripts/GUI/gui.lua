@@ -161,7 +161,7 @@ function GUI.onGuiEvent(event)
 	if event.element.get_mod() ~= "Mobile_Factory" then return end
 	-- Return if the Element is not valid --
 	if event.element == nil or event.element.valid == false then return end
-
+	game.print("GUI Event: "..event.name)
 	------- Read if the Element came from the Option GUI -------
 	GUI.readOptions(event)
 	if event.element == nil or event.element.valid == false then return end
@@ -178,16 +178,20 @@ function GUI.onGuiEvent(event)
 		if objID ~= nil then
 			local obj = global.entsTable[objID]
 			if valid(obj) == true and type(obj[callback]) == "function" then
-				obj[callback](obj, event, cbArgs)
-				GUI.updatePlayerGUIs(event)
-				return
+				local ret = obj[callback](obj, event, cbArgs)
+				if ret ~= false then
+					GUI.updatePlayerGUIs(event)
+					return
+				end
 			end
 		else
 			local tagTable = _G[args[2]]
 			if type(tagTable) == "table" and type(tagTable[callback]) == "function" then
-				tagTable[callback](event, cbArgs)
-				GUI.updatePlayerGUIs(event)
-				return
+				local ret = tagTable[callback](event, cbArgs)
+				if ret ~= false then 
+					GUI.updatePlayerGUIs(event)
+					return
+				end
 			end
 		end
 	end
@@ -201,7 +205,7 @@ function GUI.onToggleGui(event, args)
 	local MFPlayer = getMFPlayer(playerIndex)
 	if MFPlayer.GUI[guiName] == nil then
 		local GUIObj = GUI["create" .. guiName](player)
-		if args[2] ~= "skipOpen" then
+		if args[2] ~= "stackOnTop" then
 			player.opened = GUIObj.gui
 		end
 	else

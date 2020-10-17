@@ -167,7 +167,7 @@ function DA:getTooltipInfos(GUIObj, gui, justCreated)
 		addRFlow.style.bottom_padding = 10
 
 		-- Create the Recipe selector --
-		local filterName = global.useVanillaChooseElem == false and "onToggleGui;GUI;RecipeGUI;skipOpen" or ""
+		local filterName = global.useVanillaChooseElem == false and "onToggleGui;GUI;RecipeGUI,stackOnTop" or ""
 		local recipeSelector = GUIObj:addFilter(filterName, addRFlow, {"gui-description.AddRecipeTT"}, "DARecipe", "recipe", 28)
 		recipeSelector.locked = not global.useVanillaChooseElem
 

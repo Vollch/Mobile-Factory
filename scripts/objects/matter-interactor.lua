@@ -244,6 +244,7 @@ function MI:onChangeInventory(event, args)
 end
 
 function MI:onChangeFilter(event, args)
+	if event.name ~= defines.input_action.gui_elem_changed then return false end
 	self.selectedFilter = event.element.elem_value
 end
 

@@ -130,11 +130,11 @@ function GUI.updateOptionGUIGUITab(GUIObj)
 	GUI.addOption("MainGuiDirectionSwitch", scrollPane, "switch", false, {text={"gui-description.Left"}, text2={"gui-description.Right"}, text3={"gui-description.MainGUIDirection"}, tooltip3={"gui-description.MainGUIDirectionTT"}, state=GUIObj.MFPlayer.varTable.MainGUIDirection or "right"}, playerIndex)
 
 	-- Add a CheckBox for each Buttons --
-	for k, button in pairs(MFPlayer.GUI["MFMainGUI"].buttonsTable or {}) do
+	for label, button in pairs(MFPlayer.GUI["MFMainGUI"].buttonsTable or {}) do
 		local state = true
-		if GUIObj.MFPlayer.varTable["Show" .. button.name] == false then state = false end
-		GUI.addOption("MGS," .. button.name, scrollPane, "checkbox", false, {text={"", {"gui-description.MainGUIButtons"}, " ", button.name}, state=state}, playerIndex)
-		GUIObj:addCheckBox("MGS," .. button.name, scrollPane, {"", {"gui-description.MainGUIButtons"}, " ", button.name}, "", state)
+		if GUIObj.MFPlayer.varTable["Show" .. label] == false then state = false end
+		GUI.addOption("MGS," .. label, scrollPane, "checkbox", false, {text={"", {"gui-description.MainGUIButtons"}, " ", label}, state=state}, playerIndex)
+		GUIObj:addCheckBox("MGS," .. label, scrollPane, {"", {"gui-description.MainGUIButtons"}, " ", label}, "", state)
 	end
 
 end
